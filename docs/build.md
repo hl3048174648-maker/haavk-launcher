@@ -6,11 +6,31 @@
 
 - Windows 10/11 的 64 位桌面环境。
 - .NET Framework 4.x 及其 WPF 组件。
-- 系统可播放 H.264/AAC；播放器为 WPF `MediaElement`。
+- 系统可播放 3840×2160、30 fps 的 H.264 High Level 5.1 / AAC 文件；播放器为 WPF `MediaElement`。
 - PowerShell；创建快捷方式另需 Windows Script Host。
 - 测试播放和窗口交互时，需要已登录的交互式桌面会话。
 
 浏览器不随包提供。预览和自动化测试只处理本地视频，不应打开 DeepSeek 网页。
+
+## 准备 4K 视频
+
+完整发布 ZIP 已包含视频。`git clone` 和 GitHub 自动生成的 Source code 压缩包不含视频 MP4；它们提供源码、媒体清单与下载脚本。运行播放测试或创建快捷方式前，先下载视频：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\download-videos.ps1
+```
+
+脚本使用 `app/videos/manifest.json` 中的发布地址、文件大小及 SHA-256 校验值，将三个 4K 发布文件保存为播放器使用的名称：
+
+| 发布文件 | 本地播放路径 | 字节数 |
+| --- | --- | ---: |
+| `HAAVK_01_4K.mp4` | `app/videos/HAAVK_01.mp4` | 708,946,980 |
+| `HAAVK_02_4K.mp4` | `app/videos/HAAVK_02.mp4` | 743,761,309 |
+| `HAAVK_03_4K.mp4` | `app/videos/HAAVK_03.mp4` | 657,647,987 |
+
+媒体来自作者提供的 3840×2160、30 fps 文件；发布和下载仅映射文件名，不重新编码视频或改动音轨。三个文件合计约 2.11 GB。SHA-256 和字节数一致用于确认文件完整，分辨率不应根据启动窗口或录屏尺寸推断。既有 1080p 文件未修改。
+
+下载脚本会跳过大小和 SHA-256 均已符合清单的文件；不符合的文件仅在新下载通过这两项校验后替换。脚本支持 `-DestinationDirectory` 和 `-ManifestPath`，默认使用 `app/videos` 及其中的 `manifest.json`。
 
 ## 构建
 
@@ -88,18 +108,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\generate-icons.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\build.ps1
 ```
 
-录制三种主题的窗口演示另需 `ffmpeg` 位于 PATH 中：
+`record-demos.ps1` 保留为开发验证工具。它录制实际 WPF 预览窗口，默认按窗口尺寸输出；普通窗口小于 4K 时，录屏也小于 4K，不能将它当作 4K 文件或分辨率证明。运行此工具另需 `ffmpeg` 位于 PATH 中，建议将本地录制放入测试输出目录：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\record-demos.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\record-demos.ps1 -OutputDirectory .\.test-output\recordings
 ```
 
-脚本默认输出到 `docs/demos`，也支持 `-OutputDirectory` 和 `-FFmpeg` 参数。录制会运行预览窗口，需保持交互式桌面可用，并等待三个主题依次完成。它编译的 `RecordDemo.exe` 是本地辅助程序，已通过 `.gitignore` 排除。
+不指定 `-OutputDirectory` 时，脚本默认输出到 `docs/demos`；另支持 `-FFmpeg` 参数。录制会运行预览窗口，需保持交互式桌面可用，并等待三个主题依次完成。它编译的 `RecordDemo.exe` 是本地辅助程序，已通过 `.gitignore` 排除。
 
-演示输出为 960×540、30 fps，画面来自实际 WPF 预览窗口，包含右上角三个窗口控件，不展示目标网站。录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入演示；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并在记录中报告窗口尺寸。当前版本沿用已有预览演示，窗口和动画内容没有改变。
+录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入窗口录屏；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并报告窗口尺寸。这类开发录屏会重新编码；发布的三个 `_4K.mp4` 则直接使用作者提供的文件，未经过该录制流程。
+
+README 的 `docs/demos/HAAVK-03-4K.jpg` 是 4K 视频第 8 秒的源文件取帧，不是窗口录屏。公开预览与下载入口指向 Release 中的三个 4K MP4。
 
 ## 发布内容
 
-`app` 应包含 EXE、`assets`、三段优化视频、`source`、`创建DeepSeek桌面快捷方式.vbs` 和三个预览脚本。根目录保留 README、MIT 许可、视频资产许可及第三方标识说明。代码与自绘几何图标采用 MIT，三段原作及演示中的动画内容采用 CC BY 4.0；产品标识保留各自权利。
+完整发布 ZIP 应包含 EXE、`assets`、三段完整 4K 视频、媒体清单、`source`、`创建DeepSeek桌面快捷方式.vbs` 和三个预览脚本，约 2 GB。三段 4K 文件同时作为独立 Release 资产发布，方便查看或单独下载。ZIP 内使用 `HAAVK_01.mp4` 等播放器文件名，内容必须与对应 `_4K.mp4` 字节一致。
 
-不要将原始 1080p 大体积媒体、测试产物、日志、桌面 `.lnk` 或个人路径配置加入发布包。演示视频使用 `docs/demos/HAAVK-01-demo.mp4`、`HAAVK-02-demo.mp4`、`HAAVK-03-demo.mp4` 命名。
+源码仓库不跟踪 MP4；保留 `app/videos/manifest.json` 与下载脚本。旧的 720p 播放副本和窗口尺寸演示 MP4 不再作为当前版本的仓库媒体分发。源码压缩包不是完整运行包，必须先下载并校验视频。
+
+根目录保留 README、MIT 许可、视频资产许可及第三方标识说明。代码与自绘几何图标采用 MIT，三部动画及其取帧内容采用 CC BY 4.0；产品标识保留各自权利。不要将测试产物、日志、桌面 `.lnk`、开发录屏或个人路径配置加入完整发布包。

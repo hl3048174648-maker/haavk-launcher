@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "release": "v1.0.4",
+  "videos": [
+    {
+      "fileName": "HAAVK_01.mp4",
+      "url": "https://github.com/hl3048174648-maker/haavk-launcher/releases/download/v1.0.4/HAAVK_01_4K.mp4",
+      "sizeBytes": 708946980,
+      "sha256": "53074565193F7CA9BBC10157D0CD0343DEE5D32A590FCC1C06088DCEA9017DB6"
+    },
+    {
+      "fileName": "HAAVK_02.mp4",
+      "url": "https://github.com/hl3048174648-maker/haavk-launcher/releases/download/v1.0.4/HAAVK_02_4K.mp4",
+      "sizeBytes": 743761309,
+      "sha256": "080B536AF549197B7F535E40FB1BCB0887355179C5F2CC72C72E9007507DE73A"
+    },
+    {
+      "fileName": "HAAVK_03.mp4",
+      "url": "https://github.com/hl3048174648-maker/haavk-launcher/releases/download/v1.0.4/HAAVK_03_4K.mp4",
+      "sizeBytes": 657647987,
+      "sha256": "9A3E27475F58411E2192482ED175384641840306824C7EDB208CD0EEC6898923"
+    }
+  ]
+}

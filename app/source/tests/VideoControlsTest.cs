@@ -90,6 +90,8 @@ public static class VideoControlsTest
     }
     private static void CheckLayoutAndSound(VideoWindow window,MediaElement media,List<string> problems)
     {
+        // Media metadata can arrive before WPF's deferred measure/arrange pass.
+        window.UpdateLayout();
         if(media.IsMuted || Math.Abs(media.Volume-1.0)>0.001) problems.Add("audio is not unmuted at full volume");
         if(CountButtons((DependencyObject)window.Content)!=3) problems.Add("expected exactly three window controls");
         if(Math.Abs(window.Width/window.Height-16.0/9)>0.005) problems.Add("window is not 16:9");

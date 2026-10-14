@@ -40,5 +40,9 @@ logs/
 originals/
 raw-media/
 
-# The portable EXE and optimized app/videos assets are intentionally tracked.
+# The portable EXE is tracked. Exact 4K media is distributed through Releases.
 /app/source/IconGenerator.dll
+
+# Large 4K assets are restored with app/source/download-videos.ps1
+/app/videos/*.mp4
+/app/videos/*.partial-*
