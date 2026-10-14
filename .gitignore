@@ -1,0 +1,43 @@
+# Local build and test output
+bin/
+obj/
+.test-output/
+TestResults/
+test-results/
+*.pdb
+*.log
+*.tmp
+*.tmp.exe
+/docs/demos/RecordDemo.exe
+/docs/demos/*.txt
+/HAAVK-Release/
+
+# Editor and operating-system metadata
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local workspace, validation output, and private configuration
+.codex/
+.env
+.env.*
+work/
+preview/
+validation/
+logs/
+验证记录.txt
+*.lnk
+
+# Release archives and original large media are not repository inputs
+*.zip
+*.7z
+originals/
+raw-media/
+
+# The portable EXE and optimized app/videos assets are intentionally tracked.
+/app/source/IconGenerator.dll
