@@ -33,7 +33,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1
 | 测试源码 | 检查内容 |
 | --- | --- |
 | `VideoOptionsTests.cs` | 六种目标/主题组合、预览模式、路径处理，以及非法参数拒绝，共 12 组 |
-| `VideoControlsTest.cs` | 7 项预览场景，检查原声音轨开启、纯视频 16:9 布局、无可见按钮、Enter 不跳过、Esc 结束预览、系统关闭，以及缺失和损坏视频的 Esc 提示 |
+| `VideoControlsTest.cs` | 检查原声音轨开启、视频比例、右上角最小化/最大化还原/关闭控件、Enter 不跳过、Esc 结束预览、系统关闭，以及缺失和损坏视频的 Esc 提示 |
 | `PlaybackTest.cs` | 三个主题均能载入、持续推进至完整片尾并收到 `MediaEnded`，不提前截断 |
 
 完整播放测试需要等待三段视频，至少约 94 秒，另有编译和载入时间。窗口控制与播放测试均使用预览模式，不执行目标应用的启动。WPF 播放依赖当前系统的媒体组件和桌面会话；测试失败时先查看输出的具体错误。
@@ -52,7 +52,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1 -
 .\app\HAAVK-Launch.exe --preview 03
 ```
 
-确认三段动画均以 16:9 原始比例填满窗口，正常播放时没有控制栏、进度条、文字或按钮。原视频音轨始终开启，动画播放至片尾自动关闭。分别检查 Enter 不触发操作、Esc 结束预览、Alt+F4 关闭，以及拖动窗口。实际听到的音量取决于 Windows 音量和输出设备。
+确认三段动画的右上角均显示最小化、最大化/还原和关闭按钮，视频区域没有底部控制栏或进度条。普通窗口保持 16:9；最大化后视频仍保持原始比例，不拉伸或裁切，再次点击能还原。原视频音轨始终开启，预览播放至片尾自动关闭。分别检查 Enter 不触发操作、Esc 结束预览、×/Alt+F4 关闭，以及拖动窗口。实际听到的音量取决于 Windows 音量和输出设备。
+
+最小化后，确认声音和播放继续推进；在片尾前从任务栏还原，应能继续看到当前画面。预览模式即使保持最小化，也应在播完后自行关闭。
 
 准备验证实际目标时，运行以下命令：
 
@@ -61,7 +63,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1 -
 .\app\HAAVK-Launch.exe deepseek 02
 ```
 
-第一条在动画结束或按 Esc 后，通过 Windows `shell:AppsFolder` 打开已安装的 `OpenAI.Codex_2p2nqsd0c76g0!App`；第二条通过默认浏览器打开 `https://chat.deepseek.com/`。确认 Enter 不跳过、系统关闭窗口会取消本次启动。视频失败时，中央错误提示应说明可按 Esc 继续打开目标。目标路由定义在 `LaunchCore.cs`。
+第一条在动画结束或按 Esc 后，通过 Windows `shell:AppsFolder` 打开已安装的 `OpenAI.Codex_2p2nqsd0c76g0!App`；第二条通过默认浏览器打开 `https://chat.deepseek.com/`。确认 Enter 不跳过，×/Alt+F4 或系统关闭窗口会取消本次启动；保持最小化直到片尾仍应打开目标。视频失败时，中央错误提示应说明可按 Esc 继续打开目标，× 仍可取消。目标路由定义在 `LaunchCore.cs`。
 
 快捷方式安装脚本默认写入当前用户桌面；也可传入一个已存在的测试目录，先检查生成的六个入口：
 
@@ -89,7 +91,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\record-demos.ps
 
 脚本默认输出到 `docs/demos`，也支持 `-OutputDirectory` 和 `-FFmpeg` 参数。录制会运行预览窗口，需保持交互式桌面可用，并等待三个主题依次完成。它编译的 `RecordDemo.exe` 是本地辅助程序，已通过 `.gitignore` 排除。
 
-演示输出为 960×540、30 fps，画面来自实际 WPF 预览窗口。录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入演示；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并在记录中报告窗口尺寸。
+演示输出为 960×540、30 fps，画面来自实际 WPF 预览窗口，包含右上角三个窗口控件。录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入演示；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并在记录中报告窗口尺寸。
 
 ## 发布内容
 

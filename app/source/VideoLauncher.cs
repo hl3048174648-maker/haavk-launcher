@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shell;
 using System.Windows.Threading;
 
 namespace LaunchBloom
@@ -57,6 +58,29 @@ namespace LaunchBloom
                 FontFamily=new FontFamily("Microsoft YaHei UI"), VerticalAlignment=VerticalAlignment.Center };
         }
 
+        private static Button WindowButton(string id,string label,string geometry,bool isClose)
+        {
+            Button button=new Button { Width=36, Height=30, Padding=new Thickness(0), Background=Brushes.Transparent,
+                BorderThickness=new Thickness(0), Cursor=Cursors.Arrow, ToolTip=label, FocusVisualStyle=null };
+            button.Content=new System.Windows.Shapes.Path { Width=14, Height=14, Data=Geometry.Parse(geometry),
+                Stroke=Brushes.White, StrokeThickness=1.2, IsHitTestVisible=false };
+            System.Windows.Automation.AutomationProperties.SetAutomationId(button,id);
+            System.Windows.Automation.AutomationProperties.SetName(button,label);
+            FrameworkElementFactory border=new FrameworkElementFactory(typeof(Border));
+            border.SetValue(Border.CornerRadiusProperty,new CornerRadius(4));
+            border.SetBinding(Border.BackgroundProperty,new System.Windows.Data.Binding("Background") { RelativeSource=System.Windows.Data.RelativeSource.TemplatedParent });
+            FrameworkElementFactory content=new FrameworkElementFactory(typeof(ContentPresenter));
+            content.SetValue(FrameworkElement.HorizontalAlignmentProperty,HorizontalAlignment.Center);
+            content.SetValue(FrameworkElement.VerticalAlignmentProperty,VerticalAlignment.Center);
+            border.AppendChild(content);
+            ControlTemplate template=new ControlTemplate(typeof(Button)) { VisualTree=border };
+            Trigger hover=new Trigger { Property=UIElement.IsMouseOverProperty, Value=true };
+            hover.Setters.Add(new Setter(Control.BackgroundProperty,Ink(isClose ? "#D7C42B31" : "#80465062")));
+            template.Triggers.Add(hover);
+            button.Template=template;
+            return button;
+        }
+
         public VideoWindow(VideoOptions options)
         {
             this.options=options;
@@ -69,7 +93,9 @@ namespace LaunchBloom
                 try { Icon=BitmapFrame.Create(new Uri(iconPath),BitmapCreateOptions.None,BitmapCacheOption.OnLoad); }
                 catch(IOException) { } catch(NotSupportedException) { } catch(FileFormatException) { }
             }
-            WindowStyle=WindowStyle.None; ResizeMode=ResizeMode.NoResize;
+            WindowStyle=WindowStyle.None; ResizeMode=ResizeMode.CanMinimize;
+            WindowChrome.SetWindowChrome(this,new WindowChrome { CaptionHeight=0, ResizeBorderThickness=new Thickness(0),
+                GlassFrameThickness=new Thickness(0), CornerRadius=new CornerRadius(0), UseAeroCaptionButtons=false });
             // Opaque WPF windows allow reliable native video composition.
             Background=Brushes.Black; WindowStartupLocation=WindowStartupLocation.CenterScreen;
             Width=Math.Min(960,Math.Min(SystemParameters.WorkArea.Width*0.85,SystemParameters.WorkArea.Height*0.85*16/9));
@@ -86,9 +112,33 @@ namespace LaunchBloom
             loading.TextAlignment=TextAlignment.Center; loading.TextWrapping=TextWrapping.Wrap;
             loading.Margin=new Thickness(24);
             videoArea.Children.Add(loading);
+
+            StackPanel windowButtons=new StackPanel { Orientation=Orientation.Horizontal };
+            Border controls=new Border { Child=windowButtons, Background=Ink("#B31C2028"), CornerRadius=new CornerRadius(6),
+                Padding=new Thickness(2), Margin=new Thickness(8), HorizontalAlignment=HorizontalAlignment.Right, VerticalAlignment=VerticalAlignment.Top };
+            WindowChrome.SetIsHitTestVisibleInChrome(controls,true);
+            Button minimize=WindowButton("MinimizeWindow","最小化","M 2,8 L 12,8",false);
+            minimize.ToolTip="最小化（继续播放）";
+            Button maximize=WindowButton("MaximizeRestoreWindow","最大化","M 2,2 L 12,2 12,12 2,12 Z",false);
+            Button close=WindowButton("CloseWindow","关闭并取消启动","M 2,2 L 12,12 M 12,2 L 2,12",true);
+            minimize.Click+=delegate { WindowState=WindowState.Minimized; };
+            maximize.Click+=delegate { WindowState=WindowState==WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; };
+            close.Click+=delegate { Close(); };
+            windowButtons.Children.Add(minimize); windowButtons.Children.Add(maximize); windowButtons.Children.Add(close);
+            controls.MouseLeftButtonDown+=delegate(object sender,MouseButtonEventArgs e) { e.Handled=true; };
+            videoArea.Children.Add(controls);
+            StateChanged+=delegate {
+                bool maximized=WindowState==WindowState.Maximized;
+                string label=maximized ? "还原" : "最大化";
+                maximize.ToolTip=label;
+                System.Windows.Automation.AutomationProperties.SetName(maximize,label);
+                ((System.Windows.Shapes.Path)maximize.Content).Data=Geometry.Parse(maximized ? "M 5,2 L 12,2 12,9 M 2,5 L 9,5 9,12 2,12 Z" : "M 2,2 L 12,2 12,12 2,12 Z");
+                if(opened) motionClock.Restart(); else if(loadClock.IsRunning) loadClock.Restart();
+            };
             videoArea.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e)
             {
-                if(e.LeftButton == MouseButtonState.Pressed) { try { DragMove(); } catch(InvalidOperationException) { } }
+                if(e.LeftButton == MouseButtonState.Pressed && !controls.IsMouseOver && WindowState==WindowState.Normal)
+                    { try { DragMove(); } catch(InvalidOperationException) { } }
             };
 
             PreviewKeyDown += delegate(object sender,KeyEventArgs e)
@@ -117,6 +167,8 @@ namespace LaunchBloom
         private void CheckPlayback()
         {
             if(closed || mediaError) return;
+            // Playback remains active; a minimized compositor must not cause a false stall error.
+            if(WindowState==WindowState.Minimized) return;
             if(!opened)
             {
                 if(loadClock.Elapsed.TotalSeconds>15) ShowMediaError("视频载入超时。");

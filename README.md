@@ -20,7 +20,7 @@ Codex 入口使用应用自带标识，DeepSeek 入口使用官网鲸鱼图标�
 
 随包视频为 **1280×720、30 fps、H.264 + AAC** 的轻量播放副本，保留完整内容、原始时长和 16:9 比例。仓库不包含体积较大的 1080p 原始媒体。
 
-正常播放时只显示 16:9 视频画面，没有底部控制栏、进度条或关闭按钮。视频里的百分比、终端文字和图表属于动画内容，不表示目标应用的加载状态。
+三个主题的窗口右上角均有最小化、最大化/还原和关闭按钮，叠放在视频上方；没有底部控制栏或进度条。视频始终保持原始比例，最大化时也不拉伸或裁切。视频里的百分比、终端文字和图表属于动画内容，不表示目标应用的加载状态。
 
 ## 开始使用
 
@@ -39,7 +39,9 @@ Codex 入口打开本机已安装的 Codex MSIX 应用；DeepSeek 入口使用�
 | 等待动画播完 | 自动打开目标 |
 | `Esc` | 跳过剩余动画，立即打开目标；预览模式只结束预览 |
 | `Enter` | 不触发跳过或关闭 |
-| `Alt+F4` 或通过系统关闭窗口 | 取消本次启动 |
+| 右上角最小化按钮 | 隐藏到任务栏，动画和声音继续播放；播完仍会自动打开目标 |
+| 右上角最大化/还原按钮 | 切换最大化和原窗口大小，保持视频原始比例 |
+| 右上角 `×`、`Alt+F4` 或系统关闭窗口 | 取消本次启动，不打开目标 |
 | 按住视频区域拖动 | 移动窗口 |
 
 启动器始终开启原视频音轨；实际听到的音量仍取决于 Windows 音量和当前输出设备。
@@ -78,7 +80,9 @@ Codex 和 DeepSeek 名称用于说明启动目标。本项目与 OpenAI、DeepSe
 
 ## English
 
-A standalone Windows animated launcher for the installed Codex desktop app and the DeepSeek website. Three full-length HAAVK videos are included at 720p/30 fps. Normal playback shows only the 16:9 video, with its original audio enabled. The target opens when playback ends; **Esc** skips directly to it. **Enter** has no action, and **Alt+F4** cancels. In preview mode, the end of playback or Esc closes the window without opening a target. Audible volume still depends on Windows volume and the selected output device.
+A standalone Windows animated launcher for the installed Codex desktop app and the DeepSeek website. Three full-length HAAVK videos are included at 720p/30 fps with their original audio enabled. All themes have top-right **minimize**, **maximize/restore**, and **close** buttons. Minimizing keeps playback running and still opens the target at the end. Maximizing preserves the video's aspect ratio. **×** or **Alt+F4** cancels without opening the target.
+
+The target opens when playback ends; **Esc** skips directly to it. **Enter** has no action. In preview mode, the end of playback or Esc closes the window without opening a target. Audible volume still depends on Windows volume and the selected output device.
 
 The 960×540/30 fps demos capture the actual WPF preview window. Their audio comes from the original video track, aligned to the player clock; it is not a desktop audio recording.
 
