@@ -16,7 +16,7 @@
 
 ![HAAVK 03 启动器实录画面](docs/demos/HAAVK-03-demo.png)
 
-三个主题使用独立配色图标，编号区分 01 / 02 / 03，C / D 分别表示 Codex / DeepSeek。完整图标预览见[图标总览](docs/icons-preview.png)。
+Codex 入口使用应用自带标识，DeepSeek 入口使用官网鲸鱼图标。版本由快捷方式名称中的 01 / 02 / 03 区分。完整图标预览见[图标总览](docs/icons-preview.png)。
 
 随包视频为 **1280×720、30 fps、H.264 + AAC** 的轻量播放副本，保留完整内容、原始时长和 16:9 比例。仓库不包含体积较大的 1080p 原始媒体。
 
@@ -69,6 +69,7 @@ Codex 桌面应用需事先安装，DeepSeek 网页需要默认浏览器和网�
 ## 许可与作者
 
 - 启动器代码、脚本、文档和项目自绘几何图标：Copyright © 2026 [hl3048174648-maker](https://github.com/hl3048174648-maker)，采用 [MIT License](LICENSE)。
+- Codex / OpenAI 与 DeepSeek 标识来自对应产品，权利属于各自权利人，不适用本项目的 MIT 或视频许可；见[第三方标识说明](THIRD_PARTY_NOTICES.md)。
 - 三部 HAAVK 动画由 [hl3048174648-maker](https://github.com/hl3048174648-maker) 原创并授权公开分享，采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。复用时请署名、链接许可证，并说明修改情况，详见 [视频资产许可](LICENSE-ASSETS.md)。
 
 Codex 和 DeepSeek 名称用于说明启动目标。本项目与 OpenAI、DeepSeek 无官方关联。
@@ -78,3 +79,5 @@ Codex 和 DeepSeek 名称用于说明启动目标。本项目与 OpenAI、DeepSe
 A standalone Windows animated launcher for the installed Codex desktop app and the DeepSeek website. Three full-length HAAVK videos are included at 720p/30 fps. Playback starts muted; **Enter** skips to the target and **Esc** cancels. Preview mode never opens either target.
 
 Extract the complete package, then run the shortcut installer in `app`. Keep the executable, `assets`, and `videos` together. This is an independent shortcut launcher, not an official plugin or an injected modification. Code and original geometric icons are MIT licensed; the original HAAVK videos by **hl3048174648-maker** are licensed under **CC BY 4.0**.
+
+Codex shortcuts use the installed application's mark; DeepSeek shortcuts use its official whale icon. Product marks retain their respective owners' rights and are excluded from this project's licenses. See [third-party notices](THIRD_PARTY_NOTICES.md).

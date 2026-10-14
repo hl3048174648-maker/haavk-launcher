@@ -28,6 +28,8 @@ CC BY 4.0 允许在遵守许可的前提下分享、修改和商业使用。使�
 
 启动器源代码、脚本、文档和 `app/assets` 中项目自绘的几何图标适用仓库根目录的 [MIT License](LICENSE)。视频资产不适用 MIT License。本许可不授予第三方产品名称或商标的权利。
 
+Codex / OpenAI 与 DeepSeek 产品标识不属于 HAAVK 原创视频或自绘图标，亦不适用本项目上述许可，详见[第三方标识说明](THIRD_PARTY_NOTICES.md)。
+
 ## English
 
 The three original HAAVK audiovisual works listed above were created by **hl3048174648-maker** and are shared under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The bundled copies were transcoded from 1080p to 720p/30 fps while preserving their complete content, duration, and aspect ratio. Credit the creator, link the license and source, and indicate any changes. The same license applies to the HAAVK animation content shown in the demonstration recordings. The launcher code and original geometric icons use the separate [MIT License](LICENSE).

@@ -73,7 +73,7 @@ cscript //nologo .\app\创建六个桌面快捷方式.vbs $shortcutFolder
 
 ## 图标与演示
 
-项目的几何图标由 `IconGenerator.cs` 绘制。需要重新生成时，指定一个本地预览输出位置，再编译 EXE 以更新嵌入的图标：
+图标生成脚本保留 HAAVK 预览入口的几何图标，并从 `app/assets/brand` 中的产品图像打包 Codex / OpenAI 和 DeepSeek 的 ICO。AI 入口不添加 H 字样或版本角标。产品标识权利说明见根目录 `THIRD_PARTY_NOTICES.md`。需要重新生成时，指定一个本地预览输出位置，再编译 EXE 以更新嵌入的图标：
 
 ```powershell
 New-Item -ItemType Directory -Force .\.test-output | Out-Null
@@ -91,6 +91,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\record-demos.ps
 
 ## 发布内容
 
-`app` 应包含 EXE、`assets`、三段优化视频、`source`、创建快捷方式脚本和三个预览脚本。根目录保留 README、MIT 许可及视频资产许可。代码与自绘几何图标采用 MIT，三段原作及演示中的动画内容采用 CC BY 4.0。
+`app` 应包含 EXE、`assets`、三段优化视频、`source`、创建快捷方式脚本和三个预览脚本。根目录保留 README、MIT 许可、视频资产许可及第三方标识说明。代码与自绘几何图标采用 MIT，三段原作及演示中的动画内容采用 CC BY 4.0；产品标识保留各自权利。
 
 不要将原始 1080p 大体积媒体、测试产物、日志、桌面 `.lnk` 或个人路径配置加入发布包。演示视频使用 `docs/demos/HAAVK-01-demo.mp4`、`HAAVK-02-demo.mp4`、`HAAVK-03-demo.mp4` 命名。

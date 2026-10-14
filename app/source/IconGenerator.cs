@@ -5,11 +5,12 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 
-// Reproducible, font-independent icon artwork. All glyphs are vector geometry.
-// The contact sheet alone uses Segoe UI for its labels.
+// Codex and DeepSeek use their original brand assets. H geometry is used only
+// for video preview icons. The contact sheet uses Segoe UI for its labels.
 public static class IconGenerator
 {
     private static readonly int[] Sizes = { 16, 24, 32, 48, 64, 128, 256 };
+    private static string assetsDirectory;
     private static readonly Color White = Color.FromArgb(240, 245, 250);
     private static readonly Color[] First = {
         Color.FromArgb(65, 229, 197), Color.FromArgb(193, 159, 255), Color.FromArgb(255, 131, 130)
@@ -22,6 +23,7 @@ public static class IconGenerator
     {
         if (args.Length != 2) { Console.Error.WriteLine("Usage: IconGenerator <assets-directory> <contact-sheet.png>"); return 2; }
         string assets = Path.GetFullPath(args[0]);
+        assetsDirectory = assets;
         string preview = Path.GetFullPath(args[1]);
         Directory.CreateDirectory(assets);
         Directory.CreateDirectory(Path.GetDirectoryName(preview));
@@ -31,21 +33,30 @@ public static class IconGenerator
             for (int variant = 1; variant <= 3; variant++)
             {
                 string name = target + "-" + variant.ToString("00");
-                WriteIcon(Path.Combine(assets, name + ".ico"), target, variant);
-                using (Bitmap image = Render(target, variant, 256)) image.Save(Path.Combine(assets, name + ".png"), ImageFormat.Png);
+                string iconPath = Path.Combine(assets, name + ".ico");
+                string pngPath = Path.Combine(assets, name + ".png");
+                if (target != "haavk" || !File.Exists(iconPath)) WriteIcon(iconPath, target, variant);
+                if (target != "haavk" || !File.Exists(pngPath))
+                    using (Bitmap image = Render(target, variant, 256)) image.Save(pngPath, ImageFormat.Png);
             }
         }
         WriteIcon(Path.Combine(assets, "codex.ico"), "codex", 0);
         WriteIcon(Path.Combine(assets, "deepseek.ico"), "deepseek", 0);
-        WriteIcon(Path.Combine(assets, "launch.ico"), "haavk", 0);
+        foreach (string target in new string[] { "codex", "deepseek" })
+        {
+            File.Copy(Path.Combine(assets, target + ".ico"), Path.Combine(assets, "brand", target + ".ico"), true);
+            using (Bitmap image = Render(target, 0, 256)) image.Save(Path.Combine(assets, target + ".png"), ImageFormat.Png);
+        }
+        if (!File.Exists(Path.Combine(assets, "launch.ico"))) WriteIcon(Path.Combine(assets, "launch.ico"), "haavk", 0);
         WriteContactSheet(preview);
-        Console.WriteLine("Created 12 ICO files, 9 PNG previews, and the contact sheet.");
-        Console.WriteLine("Validated every ICO: 16, 24, 32, 48, 64, 128, 256 px; 32-bit PNG frames; transparent corners.");
+        Console.WriteLine("Updated all Codex/DeepSeek icons from original AI artwork, including fresh assets/brand icon paths.");
+        Console.WriteLine("Validated generated ICOs: 16, 24, 32, 48, 64, 128, 256 px; 32-bit PNG frames; transparent corners.");
         return 0;
     }
 
     private static Bitmap Render(string target, int variant, int size)
     {
+        if (target == "codex" || target == "deepseek") return RenderBrand(target, size);
         // Oversampling keeps diagonal edges and tiny badges clean at desktop sizes.
         int renderSize = Math.Max(256, size * 4);
         using (Bitmap large = new Bitmap(renderSize, renderSize, PixelFormat.Format32bppArgb))
@@ -68,6 +79,40 @@ public static class IconGenerator
                 graphics.DrawImage(large, new Rectangle(0, 0, size, size), 0, 0, renderSize, renderSize, GraphicsUnit.Pixel);
             }
             return result;
+        }
+    }
+
+    private static Bitmap RenderBrand(string target, int size)
+    {
+        string source;
+        if (target == "codex")
+        {
+            int nativeSize = size == 128 ? 256 : size;
+            source = Path.Combine(assetsDirectory, "brand", "codex",
+                "Square44x44Logo.targetsize-" + nativeSize + "_altform-unplated.png");
+        }
+        else source = Path.Combine(assetsDirectory, "brand", "deepseek-official-favicon.ico");
+
+        using (Bitmap original = new Bitmap(source))
+        {
+            if (original.Width == size && original.Height == size)
+                return original.Clone(new Rectangle(0, 0, size, size), PixelFormat.Format32bppArgb);
+
+            Bitmap resized = new Bitmap(size, size, PixelFormat.Format32bppArgb);
+            using (Graphics graphics = Graphics.FromImage(resized))
+            {
+                graphics.Clear(Color.Transparent);
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    attributes.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(original, new Rectangle(0, 0, size, size), 0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+            return resized;
         }
     }
 
@@ -238,7 +283,7 @@ public static class IconGenerator
                 using (MemoryStream buffer = new MemoryStream(data))
                 using (Bitmap frame = new Bitmap(buffer))
                 {
-                    if (frame.Width != width || frame.Height != height || frame.GetPixel(0, 0).A != 0 || frame.GetPixel(width - 1, height - 1).A != 0 || frame.GetPixel(width / 2, height / 2).A != 255)
+                    if (frame.Width != width || frame.Height != height || frame.GetPixel(0, 0).A != 0 || frame.GetPixel(width - 1, height - 1).A != 0)
                         throw new InvalidDataException("Invalid frame pixels: " + path);
                 }
             }
@@ -249,7 +294,7 @@ public static class IconGenerator
 
     private static void WriteContactSheet(string path)
     {
-        using (Bitmap sheet = new Bitmap(1240, 1040, PixelFormat.Format32bppArgb))
+        using (Bitmap sheet = new Bitmap(1240, 930, PixelFormat.Format32bppArgb))
         using (Graphics graphics = Graphics.FromImage(sheet))
         using (Font title = new Font("Segoe UI", 26, FontStyle.Bold, GraphicsUnit.Pixel))
         using (Font heading = new Font("Segoe UI", 18, FontStyle.Bold, GraphicsUnit.Pixel))
@@ -259,8 +304,8 @@ public static class IconGenerator
         {
             graphics.Clear(Color.FromArgb(14, 20, 30));
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            graphics.DrawString("HAAVK / LAUNCH ICONS", title, bright, 40, 28);
-            graphics.DrawString("Three versions. One visual family.  /  Native sizes: 16 · 24 · 32 · 48 · 64 · 128 · 256 px", caption, muted, 42, 70);
+            graphics.DrawString("HAAVK / AI LAUNCH ICONS", title, bright, 40, 28);
+            graphics.DrawString("Native Codex and official DeepSeek logos. Shortcut labels distinguish versions 01 / 02 / 03.", caption, muted, 42, 70);
             string[] targets = { "codex", "deepseek", "haavk" };
             string[] labels = { "CODEX", "DEEPSEEK", "PREVIEW" };
             for (int column = 0; column < 3; column++) graphics.DrawString(labels[column], heading, bright, 218 + column * 340, 119);
@@ -271,30 +316,25 @@ public static class IconGenerator
                 {
                     graphics.FillRectangle(swatch, 42, y + 8, 5, 42);
                     graphics.DrawString(variant.ToString("00"), title, bright, 61, y + 4);
-                    graphics.DrawString(variant == 1 ? "TEAL / AMBER" : variant == 2 ? "PURPLE" : "RED", caption, muted, 61, y + 49);
+                    graphics.DrawString("VIDEO VERSION", caption, muted, 61, y + 49);
                 }
                 for (int column = 0; column < 3; column++)
                 {
                     int x = 216 + column * 340;
-                    using (Bitmap icon = Render(targets[column], variant, 128)) graphics.DrawImageUnscaled(icon, x + 25, y);
+                    using (Bitmap icon = Render(targets[column], variant, 128))
+                        graphics.DrawImage(icon, new Rectangle(x + 25, y, 128, 128), 0, 0, 128, 128, GraphicsUnit.Pixel);
                     int thumbX = x;
                     foreach (int size in new int[] { 16, 24, 32, 48 })
                     {
-                        using (Bitmap icon = Render(targets[column], variant, size)) graphics.DrawImageUnscaled(icon, thumbX, y + 151 + (48 - size) / 2);
+                        using (Bitmap icon = Render(targets[column], variant, size))
+                            graphics.DrawImage(icon, new Rectangle(thumbX, y + 151 + (48 - size) / 2, size, size), 0, 0, size, size, GraphicsUnit.Pixel);
                         graphics.DrawString(size.ToString(), caption, muted, thumbX, y + 204);
                         thumbX += size + 18;
                     }
                 }
             }
             using (Pen line = new Pen(Color.FromArgb(47, 60, 79))) graphics.DrawLine(line, 40, 877, 1200, 877);
-            graphics.DrawString("COMMON ICONS", heading, bright, 42, 909);
-            for (int column = 0; column < 3; column++)
-            {
-                int x = 290 + column * 290;
-                using (Bitmap icon = Render(targets[column], 0, 64)) graphics.DrawImageUnscaled(icon, x, 901);
-                graphics.DrawString(column == 2 ? "launch.ico" : targets[column] + ".ico", caption, muted, x + 80, 924);
-            }
-            graphics.DrawString("Vector artwork · transparent rounded tiles · C / D / play badges", caption, muted, 42, 993);
+            graphics.DrawString("Native AI artwork preserved. H is used only for video preview shortcuts.  /  ICO sizes: 16 · 24 · 32 · 48 · 64 · 128 · 256 px", caption, muted, 42, 895);
             sheet.Save(path, ImageFormat.Png);
         }
     }
