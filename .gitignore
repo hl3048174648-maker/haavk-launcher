@@ -8,6 +8,7 @@ test-results/
 *.log
 *.tmp
 *.tmp.exe
+*.tmp.mp4
 /docs/demos/RecordDemo.exe
 /docs/demos/*.txt
 /HAAVK-Release/

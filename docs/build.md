@@ -33,10 +33,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1
 | 测试源码 | 检查内容 |
 | --- | --- |
 | `VideoOptionsTests.cs` | 六种目标/主题组合、预览模式、路径处理，以及非法参数拒绝，共 12 组 |
-| `VideoControlsTest.cs` | Enter 结束预览、Esc/关闭取消启动、缺失和损坏视频处理，共 7 项 |
+| `VideoControlsTest.cs` | 7 项预览场景，检查原声音轨开启、纯视频 16:9 布局、无可见按钮、Enter 不跳过、Esc 结束预览、系统关闭，以及缺失和损坏视频的 Esc 提示 |
 | `PlaybackTest.cs` | 三个主题均能载入、持续推进至完整片尾并收到 `MediaEnded`，不提前截断 |
 
-完整播放测试需要等待三段视频，至少约 94 秒，另有编译和载入时间。测试使用预览或取消路径，不执行目标应用的启动。WPF 播放依赖当前系统的媒体组件和桌面会话；测试失败时先查看输出的具体错误。
+完整播放测试需要等待三段视频，至少约 94 秒，另有编译和载入时间。窗口控制与播放测试均使用预览模式，不执行目标应用的启动。WPF 播放依赖当前系统的媒体组件和桌面会话；测试失败时先查看输出的具体错误。
 
 默认测试产物写入 `app/source/test-results`，该目录已加入 `.gitignore`。可用 `-OutputDirectory` 指定其他位置；只运行参数和交互检查时，可加 `-SkipPlayback`：
 
@@ -52,7 +52,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1 -
 .\app\HAAVK-Launch.exe --preview 03
 ```
 
-确认三段动画均以原始比例播放，默认静音，声音按钮可切换，进度推进且片尾自动关闭。分别检查 Enter 结束预览、Esc 取消，以及拖动窗口。
+确认三段动画均以 16:9 原始比例填满窗口，正常播放时没有控制栏、进度条、文字或按钮。原视频音轨始终开启，动画播放至片尾自动关闭。分别检查 Enter 不触发操作、Esc 结束预览、Alt+F4 关闭，以及拖动窗口。实际听到的音量取决于 Windows 音量和输出设备。
 
 准备验证实际目标时，运行以下命令：
 
@@ -61,7 +61,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1 -
 .\app\HAAVK-Launch.exe deepseek 02
 ```
 
-第一条在动画结束或按 Enter 后，通过 Windows `shell:AppsFolder` 打开已安装的 `OpenAI.Codex_2p2nqsd0c76g0!App`；第二条通过默认浏览器打开 `https://chat.deepseek.com/`。目标路由定义在 `LaunchCore.cs`。
+第一条在动画结束或按 Esc 后，通过 Windows `shell:AppsFolder` 打开已安装的 `OpenAI.Codex_2p2nqsd0c76g0!App`；第二条通过默认浏览器打开 `https://chat.deepseek.com/`。确认 Enter 不跳过、系统关闭窗口会取消本次启动。视频失败时，中央错误提示应说明可按 Esc 继续打开目标。目标路由定义在 `LaunchCore.cs`。
 
 快捷方式安装脚本默认写入当前用户桌面；也可传入一个已存在的测试目录，先检查生成的六个入口：
 
@@ -88,6 +88,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\record-demos.ps
 ```
 
 脚本默认输出到 `docs/demos`，也支持 `-OutputDirectory` 和 `-FFmpeg` 参数。录制会运行预览窗口，需保持交互式桌面可用，并等待三个主题依次完成。它编译的 `RecordDemo.exe` 是本地辅助程序，已通过 `.gitignore` 排除。
+
+演示输出为 960×540、30 fps，画面来自实际 WPF 预览窗口。录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入演示；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并在记录中报告窗口尺寸。
 
 ## 发布内容
 
