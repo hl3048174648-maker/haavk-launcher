@@ -11,18 +11,17 @@ internal static class VideoOptionsTests
 
     private static int Main()
     {
-        Run("All six app/version combinations select their bundled videos and launch routes", delegate {
-            foreach (string target in new string[] { "codex", "deepseek" })
+        Run("All three DeepSeek versions select their bundled videos and web route", delegate {
             foreach (string variant in new string[] { "01", "02", "03" })
             {
-                Options options = Parse(new string[] { target, variant }, BaseDirectory);
-                Equal(target, options.Target);
+                Options options = Parse(new string[] { "deepseek", variant }, BaseDirectory);
+                Equal("deepseek", options.Target);
                 Equal(variant, options.Variant);
                 Equal(false, options.Preview);
                 Equal(@"C:\HAAVK 启动 工具\videos\HAAVK_" + variant + ".mp4", options.VideoPath);
                 if (options.Launch == null) throw new Exception("App mode needs a launch route.");
-                Equal(target == "codex" ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe") : "https://chat.deepseek.com/", options.Launch.FileName);
-                Equal(target == "codex" ? "shell:AppsFolder\\OpenAI.Codex_2p2nqsd0c76g0!App" : "", options.Launch.Arguments);
+                Equal("https://chat.deepseek.com/", options.Launch.FileName);
+                Equal("", options.Launch.Arguments);
             }
         });
         Run("All preview versions have no app target or launch route", delegate {
@@ -36,13 +35,31 @@ internal static class VideoOptionsTests
                 Equal(@"C:\HAAVK 启动 工具\videos\HAAVK_" + variant + ".mp4", options.VideoPath);
             }
         });
-        Run("App names are case-insensitive and normalized", delegate {
-            Equal("codex", Parse(new string[] { "CoDeX", "01" }, BaseDirectory).Target);
+        Run("DeepSeek names are case-insensitive and normalized", delegate {
+            Equal("deepseek", Parse(new string[] { "DeEpSeEk", "01" }, BaseDirectory).Target);
             Equal("deepseek", Parse(new string[] { "DEEPSEEK", "02" }, BaseDirectory).Target);
+            Equal("https://chat.deepseek.com/", LaunchCore.Resolve("DeEpSeEk").FileName);
+        });
+        Run("Every formerly valid Codex variant is rejected as retired", delegate {
+            foreach (string target in new string[] { "codex", "CoDeX", "CODEX" })
+            foreach (string variant in new string[] { "01", "02", "03" })
+                Reject(new string[] { target, variant }, BaseDirectory, "停用");
+        });
+        Run("LaunchCore rejects Codex case variants as retired", delegate {
+            foreach (string target in new string[] { "codex", "CoDeX", "CODEX" })
+            {
+                bool retired = false;
+                try { LaunchCore.Resolve(target); }
+                catch (ArgumentException error)
+                {
+                    retired = error.Message.Contains("Codex") && error.Message.Contains("停用");
+                }
+                if (!retired) throw new Exception("The former Codex route must return a clear Chinese retirement error.");
+            }
         });
         Run("Missing media does not prevent selecting an app", delegate {
             string absent = Path.Combine(Path.GetTempPath(), "HAAVK absent " + Guid.NewGuid().ToString("N"));
-            Options options = Parse(new string[] { "codex", "03" }, absent);
+            Options options = Parse(new string[] { "deepseek", "03" }, absent);
             Equal(Path.Combine(absent, "videos", "HAAVK_03.mp4"), options.VideoPath);
             Equal(false, File.Exists(options.VideoPath));
             Equal(false, options.Preview);
@@ -56,27 +73,27 @@ internal static class VideoOptionsTests
             Equal(Path.Combine(Environment.CurrentDirectory, "videos", "HAAVK_01.mp4"), options.VideoPath);
         });
         Run("Missing and excess CLI arguments explain correct usage", delegate {
-            string[][] invalid = { null, new string[0], new string[] { "codex" }, new string[] { "codex", "01", "extra" } };
+            string[][] invalid = { null, new string[0], new string[] { "deepseek" }, new string[] { "deepseek", "01", "extra" } };
             foreach (string[] args in invalid) Reject(args, BaseDirectory, "参数");
         });
         Run("Unknown targets cannot become commands or web addresses", delegate {
-            foreach (string target in new string[] { null, "", " ", "cmd.exe", "https://example.com/", "../codex", " codex", "codex ", "--other" })
+            foreach (string target in new string[] { null, "", " ", "cmd.exe", "https://example.com/", "../deepseek", " deepseek", "deepseek ", "--other" })
                 Reject(new string[] { target, "01" }, BaseDirectory, "目标");
         });
         Run("Variants strictly allow only two-digit bundled identifiers", delegate {
             foreach (string variant in new string[] { null, "", "1", "001", "00", "04", "01 ", " 01", "01.mp4", "../01", @"..\02", "https://example.com/03" })
-                Reject(new string[] { "codex", variant }, BaseDirectory, "版本");
+                Reject(new string[] { "deepseek", variant }, BaseDirectory, "版本");
         });
         Run("Preview also rejects invalid and extra arguments", delegate {
             Reject(new string[] { "--preview", "../01" }, BaseDirectory, "版本");
             Reject(new string[] { "--preview" }, BaseDirectory, "参数");
-            Reject(new string[] { "--preview", "02", "codex" }, BaseDirectory, "参数");
+            Reject(new string[] { "--preview", "02", "deepseek" }, BaseDirectory, "参数");
             Reject(new string[] { "--PREVIEW", "02" }, BaseDirectory, "目标");
             Reject(new string[] { "02", "--preview" }, BaseDirectory, null);
         });
         Run("Null and blank base directories are rejected", delegate {
             foreach (string path in new string[] { null, "", " \t\r\n" })
-                Reject(new string[] { "codex", "01" }, path, "目录");
+                Reject(new string[] { "deepseek", "01" }, path, "目录");
         });
         Run("Invalid base paths return a Chinese argument error", delegate {
             foreach (string path in new string[] { "C:\\bad\0path", "https://example.com/files" })

@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 
-// Codex and DeepSeek use their original brand assets. H geometry is used only
+// DeepSeek uses its original brand asset. H geometry is used only
 // for video preview icons. The contact sheet uses Segoe UI for its labels.
 public static class IconGenerator
 {
@@ -27,7 +27,7 @@ public static class IconGenerator
         string preview = Path.GetFullPath(args[1]);
         Directory.CreateDirectory(assets);
         Directory.CreateDirectory(Path.GetDirectoryName(preview));
-        string[] targets = { "codex", "deepseek", "haavk" };
+        string[] targets = { "deepseek", "haavk" };
         foreach (string target in targets)
         {
             for (int variant = 1; variant <= 3; variant++)
@@ -40,23 +40,19 @@ public static class IconGenerator
                     using (Bitmap image = Render(target, variant, 256)) image.Save(pngPath, ImageFormat.Png);
             }
         }
-        WriteIcon(Path.Combine(assets, "codex.ico"), "codex", 0);
         WriteIcon(Path.Combine(assets, "deepseek.ico"), "deepseek", 0);
-        foreach (string target in new string[] { "codex", "deepseek" })
-        {
-            File.Copy(Path.Combine(assets, target + ".ico"), Path.Combine(assets, "brand", target + ".ico"), true);
-            using (Bitmap image = Render(target, 0, 256)) image.Save(Path.Combine(assets, target + ".png"), ImageFormat.Png);
-        }
+        File.Copy(Path.Combine(assets, "deepseek.ico"), Path.Combine(assets, "brand", "deepseek.ico"), true);
+        using (Bitmap image = Render("deepseek", 0, 256)) image.Save(Path.Combine(assets, "deepseek.png"), ImageFormat.Png);
         if (!File.Exists(Path.Combine(assets, "launch.ico"))) WriteIcon(Path.Combine(assets, "launch.ico"), "haavk", 0);
         WriteContactSheet(preview);
-        Console.WriteLine("Updated all Codex/DeepSeek icons from original AI artwork, including fresh assets/brand icon paths.");
+        Console.WriteLine("Updated DeepSeek icons from the official artwork and preserved HAAVK preview icons.");
         Console.WriteLine("Validated generated ICOs: 16, 24, 32, 48, 64, 128, 256 px; 32-bit PNG frames; transparent corners.");
         return 0;
     }
 
     private static Bitmap Render(string target, int variant, int size)
     {
-        if (target == "codex" || target == "deepseek") return RenderBrand(target, size);
+        if (target == "deepseek") return RenderBrand(size);
         // Oversampling keeps diagonal edges and tiny badges clean at desktop sizes.
         int renderSize = Math.Max(256, size * 4);
         using (Bitmap large = new Bitmap(renderSize, renderSize, PixelFormat.Format32bppArgb))
@@ -67,7 +63,7 @@ public static class IconGenerator
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
                 graphics.ScaleTransform(renderSize / 256f, renderSize / 256f);
-                DrawIcon(graphics, target, variant);
+                DrawIcon(graphics, variant);
             }
             Bitmap result = new Bitmap(size, size, PixelFormat.Format32bppArgb);
             using (Graphics graphics = Graphics.FromImage(result))
@@ -82,16 +78,9 @@ public static class IconGenerator
         }
     }
 
-    private static Bitmap RenderBrand(string target, int size)
+    private static Bitmap RenderBrand(int size)
     {
-        string source;
-        if (target == "codex")
-        {
-            int nativeSize = size == 128 ? 256 : size;
-            source = Path.Combine(assetsDirectory, "brand", "codex",
-                "Square44x44Logo.targetsize-" + nativeSize + "_altform-unplated.png");
-        }
-        else source = Path.Combine(assetsDirectory, "brand", "deepseek-official-favicon.ico");
+        string source = Path.Combine(assetsDirectory, "brand", "deepseek-official-favicon.ico");
 
         using (Bitmap original = new Bitmap(source))
         {
@@ -116,7 +105,7 @@ public static class IconGenerator
         }
     }
 
-    private static void DrawIcon(Graphics graphics, string target, int variant)
+    private static void DrawIcon(Graphics graphics, int variant)
     {
         int palette = Math.Max(0, variant - 1);
         Color first = First[palette];
@@ -159,29 +148,8 @@ public static class IconGenerator
             graphics.FillEllipse(background, 163, 172, 65, 65);
             graphics.DrawEllipse(outline, 163, 172, 65, 65);
         }
-        using (Pen glyph = new Pen(White, 6.8f))
-        {
-            glyph.StartCap = LineCap.Round;
-            glyph.EndCap = LineCap.Round;
-            glyph.LineJoin = LineJoin.Round;
-            if (target == "codex") graphics.DrawArc(glyph, 181, 187, 29, 34, 46, 268);
-            else if (target == "deepseek")
-            {
-                using (GraphicsPath d = new GraphicsPath())
-                {
-                    d.AddLine(181, 187, 193, 187);
-                    d.AddBezier(193, 187, 216, 187, 216, 221, 193, 221);
-                    d.AddLine(193, 221, 181, 221);
-                    d.CloseFigure();
-                    graphics.DrawPath(glyph, d);
-                }
-            }
-            else
-            {
-                using (SolidBrush play = new SolidBrush(White))
-                    graphics.FillPolygon(play, new PointF[] { new PointF(185, 186), new PointF(185, 222), new PointF(213, 204) });
-            }
-        }
+        using (SolidBrush play = new SolidBrush(White))
+            graphics.FillPolygon(play, new PointF[] { new PointF(185, 186), new PointF(185, 222), new PointF(213, 204) });
     }
 
     private static void DrawDigit(Graphics graphics, int digit, float x, float y)
@@ -294,7 +262,7 @@ public static class IconGenerator
 
     private static void WriteContactSheet(string path)
     {
-        using (Bitmap sheet = new Bitmap(1240, 930, PixelFormat.Format32bppArgb))
+        using (Bitmap sheet = new Bitmap(900, 950, PixelFormat.Format32bppArgb))
         using (Graphics graphics = Graphics.FromImage(sheet))
         using (Font title = new Font("Segoe UI", 26, FontStyle.Bold, GraphicsUnit.Pixel))
         using (Font heading = new Font("Segoe UI", 18, FontStyle.Bold, GraphicsUnit.Pixel))
@@ -305,10 +273,10 @@ public static class IconGenerator
             graphics.Clear(Color.FromArgb(14, 20, 30));
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
             graphics.DrawString("HAAVK / AI LAUNCH ICONS", title, bright, 40, 28);
-            graphics.DrawString("Native Codex and official DeepSeek logos. Shortcut labels distinguish versions 01 / 02 / 03.", caption, muted, 42, 70);
-            string[] targets = { "codex", "deepseek", "haavk" };
-            string[] labels = { "CODEX", "DEEPSEEK", "PREVIEW" };
-            for (int column = 0; column < 3; column++) graphics.DrawString(labels[column], heading, bright, 218 + column * 340, 119);
+            graphics.DrawString("Official DeepSeek logo. Shortcut labels distinguish versions 01 / 02 / 03.", caption, muted, 42, 70);
+            string[] targets = { "deepseek", "haavk" };
+            string[] labels = { "DEEPSEEK", "PREVIEW" };
+            for (int column = 0; column < targets.Length; column++) graphics.DrawString(labels[column], heading, bright, 218 + column * 340, 119);
             for (int variant = 1; variant <= 3; variant++)
             {
                 int y = 168 + (variant - 1) * 230;
@@ -318,7 +286,7 @@ public static class IconGenerator
                     graphics.DrawString(variant.ToString("00"), title, bright, 61, y + 4);
                     graphics.DrawString("VIDEO VERSION", caption, muted, 61, y + 49);
                 }
-                for (int column = 0; column < 3; column++)
+                for (int column = 0; column < targets.Length; column++)
                 {
                     int x = 216 + column * 340;
                     using (Bitmap icon = Render(targets[column], variant, 128))
@@ -333,8 +301,9 @@ public static class IconGenerator
                     }
                 }
             }
-            using (Pen line = new Pen(Color.FromArgb(47, 60, 79))) graphics.DrawLine(line, 40, 877, 1200, 877);
-            graphics.DrawString("Native AI artwork preserved. H is used only for video preview shortcuts.  /  ICO sizes: 16 · 24 · 32 · 48 · 64 · 128 · 256 px", caption, muted, 42, 895);
+            using (Pen line = new Pen(Color.FromArgb(47, 60, 79))) graphics.DrawLine(line, 40, 877, 860, 877);
+            graphics.DrawString("Official DeepSeek artwork preserved. H identifies video preview shortcuts.", caption, muted, 42, 892);
+            graphics.DrawString("ICO sizes: 16 · 24 · 32 · 48 · 64 · 128 · 256 px", caption, muted, 42, 914);
             sheet.Save(path, ImageFormat.Png);
         }
     }

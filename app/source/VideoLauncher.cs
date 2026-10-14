@@ -84,7 +84,7 @@ namespace LaunchBloom
         public VideoWindow(VideoOptions options)
         {
             this.options=options;
-            string appName = options.Preview ? "动画预览" : (options.Target == "codex" ? "Codex" : "DeepSeek 网页");
+            string appName = options.Preview ? "动画预览" : "DeepSeek 网页";
             Title="HAAVK " + options.Variant + " · " + appName;
             string iconName=(options.Preview ? "haavk" : options.Target) + "-" + options.Variant + ".ico";
             string iconPath=Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(options.VideoPath)),"assets",iconName);

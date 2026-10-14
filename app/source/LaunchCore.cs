@@ -25,15 +25,11 @@ namespace LaunchBloom
         public static LaunchSpec Resolve(string target)
         {
             if (String.Equals(target, "codex", StringComparison.OrdinalIgnoreCase))
-            {
-                return new LaunchSpec(
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"),
-                    "shell:AppsFolder\\OpenAI.Codex_2p2nqsd0c76g0!App");
-            }
+                throw new ArgumentException("Codex 启动目标已停用，请使用 DeepSeek 或动画预览。", "target");
             if (String.Equals(target, "deepseek", StringComparison.OrdinalIgnoreCase))
                 return new LaunchSpec("https://chat.deepseek.com/", String.Empty);
 
-            throw new ArgumentException("Target must be codex or deepseek.", "target");
+            throw new ArgumentException("启动目标只能是 deepseek。", "target");
         }
 
         public static int ReadDuration(string settingsPath)

@@ -28,7 +28,7 @@ CC BY 4.0 允许在遵守许可的前提下分享、修改和商业使用。使�
 
 启动器源代码、脚本、文档和 `app/assets` 中项目自绘的几何图标适用仓库根目录的 [MIT License](LICENSE)。视频资产不适用 MIT License。本许可不授予第三方产品名称或商标的权利。
 
-Codex / OpenAI 与 DeepSeek 产品标识不属于 HAAVK 原创视频或自绘图标，亦不适用本项目上述许可，详见[第三方标识说明](THIRD_PARTY_NOTICES.md)。
+DeepSeek 产品标识不属于 HAAVK 原创视频或自绘图标，亦不适用本项目上述许可，详见[第三方标识说明](THIRD_PARTY_NOTICES.md)。
 
 ## English
 

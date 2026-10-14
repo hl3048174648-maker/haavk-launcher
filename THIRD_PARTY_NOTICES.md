@@ -4,9 +4,8 @@
 
 | 标识 | 来源 | 使用位置 |
 | --- | --- | --- |
-| Codex / OpenAI 应用标识 | 已安装的官方 OpenAI.Codex Windows 应用的图标资源 | `app/assets/brand/codex.ico`、`app/assets/codex*.ico`、`app/assets/codex*.png` |
 | DeepSeek 鲸鱼标识 | [DeepSeek 官网](https://www.deepseek.com/) 引用的 [favicon.ico](https://www.deepseek.com/favicon.ico) | `app/assets/brand/deepseek.ico`、`app/assets/deepseek*.ico`、`app/assets/deepseek*.png` |
 
 `app/assets/brand` 中保留的来源图像用于复现 Windows ICO 打包过程。图标仅做格式和尺寸适配，保持对应产品标识。HAAVK 预览入口使用项目自行绘制的 H 图标，仍适用 MIT。
 
-The Codex/OpenAI and DeepSeek marks identify the application or website opened by each shortcut. They belong to their respective rights holders and are excluded from this project's MIT and CC BY 4.0 licenses. No trademark rights or endorsement are granted. The source images are retained for reproducible ICO conversion. The project's original H icons used for HAAVK previews remain MIT licensed.
+The DeepSeek mark identifies the website opened by each shortcut. It belongs to its rights holder and is excluded from this project's MIT and CC BY 4.0 licenses. No trademark rights or endorsement are granted. The source image is retained for reproducible ICO conversion. The project's original H icons used for HAAVK previews remain MIT licensed.

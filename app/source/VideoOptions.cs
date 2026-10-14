@@ -24,15 +24,16 @@ namespace LaunchBloom
         public static VideoOptions Parse(string[] args, string baseDirectory)
         {
             if (args == null || args.Length != 2)
-                throw new ArgumentException("启动参数不完整或过多。格式：codex 01、deepseek 02 或 --preview 03。", "args");
+                throw new ArgumentException("启动参数不完整或过多。格式：deepseek 01 或 --preview 03。", "args");
 
             bool preview = String.Equals(args[0], "--preview", StringComparison.Ordinal);
             string target = String.Empty;
             if (!preview)
             {
-                if (String.Equals(args[0], "codex", StringComparison.OrdinalIgnoreCase)) target = "codex";
-                else if (String.Equals(args[0], "deepseek", StringComparison.OrdinalIgnoreCase)) target = "deepseek";
-                else throw new ArgumentException("启动目标只能是 codex 或 deepseek；仅预览请使用 --preview。", "args");
+                if (String.Equals(args[0], "codex", StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException("Codex 启动目标已停用，请使用 deepseek 或 --preview 动画预览。", "args");
+                if (String.Equals(args[0], "deepseek", StringComparison.OrdinalIgnoreCase)) target = "deepseek";
+                else throw new ArgumentException("启动目标只能是 deepseek；仅预览请使用 --preview。", "args");
             }
 
             string variant = args[1];

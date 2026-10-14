@@ -10,7 +10,7 @@
 - PowerShell；创建快捷方式另需 Windows Script Host。
 - 测试播放和窗口交互时，需要已登录的交互式桌面会话。
 
-Codex 桌面应用和浏览器不随包提供。仅执行预览或自动化测试不要求安装 Codex，也不应打开 Codex 或 DeepSeek。
+浏览器不随包提供。预览和自动化测试只处理本地视频，不应打开 DeepSeek 网页。
 
 ## 构建
 
@@ -32,7 +32,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1
 
 | 测试源码 | 检查内容 |
 | --- | --- |
-| `VideoOptionsTests.cs` | 六种目标/主题组合、预览模式、路径处理，以及非法参数拒绝，共 12 组 |
+| `VideoOptionsTests.cs` | DeepSeek 的三种主题组合、预览模式、路径处理，以及不支持的目标和非法参数拒绝，共 14 组 |
 | `VideoControlsTest.cs` | 检查原声音轨开启、视频比例、右上角最小化/最大化还原/关闭控件、Enter 不跳过、Esc 结束预览、系统关闭，以及缺失和损坏视频的 Esc 提示 |
 | `PlaybackTest.cs` | 三个主题均能载入、持续推进至完整片尾并收到 `MediaEnded`，不提前截断 |
 
@@ -59,23 +59,28 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\run-tests.ps1 -
 准备验证实际目标时，运行以下命令：
 
 ```powershell
-.\app\HAAVK-Launch.exe codex 01
 .\app\HAAVK-Launch.exe deepseek 02
 ```
 
-第一条在动画结束或按 Esc 后，通过 Windows `shell:AppsFolder` 打开已安装的 `OpenAI.Codex_2p2nqsd0c76g0!App`；第二条通过默认浏览器打开 `https://chat.deepseek.com/`。确认 Enter 不跳过，×/Alt+F4 或系统关闭窗口会取消本次启动；保持最小化直到片尾仍应打开目标。视频失败时，中央错误提示应说明可按 Esc 继续打开目标，× 仍可取消。目标路由定义在 `LaunchCore.cs`。
+动画结束或按 Esc 后，通过默认浏览器打开 `https://chat.deepseek.com/`。确认 Enter 不跳过，×/Alt+F4 或系统关闭窗口会取消本次启动；保持最小化直到片尾仍应打开网页。视频失败时，中央错误提示应说明可按 Esc 继续打开网页，× 仍可取消。目标路由定义在 `LaunchCore.cs`。
 
-快捷方式安装脚本默认写入当前用户桌面；也可传入一个已存在的测试目录，先检查生成的六个入口：
+快捷方式安装脚本默认写入当前用户桌面；也可传入一个已存在的测试目录，先检查生成的三个 DeepSeek 入口：
 
 ```powershell
 New-Item -ItemType Directory -Force .\.test-output\shortcuts | Out-Null
 $shortcutFolder = (Resolve-Path .\.test-output\shortcuts).Path
-cscript //nologo .\app\创建六个桌面快捷方式.vbs $shortcutFolder
+cscript //nologo .\app\创建DeepSeek桌面快捷方式.vbs $shortcutFolder
+```
+
+在命令末尾添加 `preview` 会在指定目录创建三个预览入口。安装脚本只新增快捷方式，不删除已有入口；同名入口会添加序号。
+
+```powershell
+cscript //nologo .\app\创建DeepSeek桌面快捷方式.vbs $shortcutFolder preview
 ```
 
 ## 图标与演示
 
-图标生成脚本保留 HAAVK 预览入口的几何图标，并从 `app/assets/brand` 中的产品图像打包 Codex / OpenAI 和 DeepSeek 的 ICO。AI 入口不添加 H 字样或版本角标。产品标识权利说明见根目录 `THIRD_PARTY_NOTICES.md`。需要重新生成时，指定一个本地预览输出位置，再编译 EXE 以更新嵌入的图标：
+图标生成脚本保留 HAAVK 预览入口的几何图标，并从 `app/assets/brand` 中的产品图像打包 DeepSeek 的 ICO。DeepSeek 入口不添加 H 字样或版本角标。产品标识权利说明见根目录 `THIRD_PARTY_NOTICES.md`。需要重新生成时，指定一个本地预览输出位置，再编译 EXE 以更新嵌入的图标：
 
 ```powershell
 New-Item -ItemType Directory -Force .\.test-output | Out-Null
@@ -91,10 +96,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\app\source\record-demos.ps
 
 脚本默认输出到 `docs/demos`，也支持 `-OutputDirectory` 和 `-FFmpeg` 参数。录制会运行预览窗口，需保持交互式桌面可用，并等待三个主题依次完成。它编译的 `RecordDemo.exe` 是本地辅助程序，已通过 `.gitignore` 排除。
 
-演示输出为 960×540、30 fps，画面来自实际 WPF 预览窗口，包含右上角三个窗口控件。录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入演示；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并在记录中报告窗口尺寸。
+演示输出为 960×540、30 fps，画面来自实际 WPF 预览窗口，包含右上角三个窗口控件，不展示目标网站。录制器观察播放器时钟，将原视频音轨对齐后编码为 AAC 合入演示；它不录制桌面音频。录制验证检查片尾事件、播放位置和播放器原声音轨是否开启，并在记录中报告窗口尺寸。当前版本沿用已有预览演示，窗口和动画内容没有改变。
 
 ## 发布内容
 
-`app` 应包含 EXE、`assets`、三段优化视频、`source`、创建快捷方式脚本和三个预览脚本。根目录保留 README、MIT 许可、视频资产许可及第三方标识说明。代码与自绘几何图标采用 MIT，三段原作及演示中的动画内容采用 CC BY 4.0；产品标识保留各自权利。
+`app` 应包含 EXE、`assets`、三段优化视频、`source`、`创建DeepSeek桌面快捷方式.vbs` 和三个预览脚本。根目录保留 README、MIT 许可、视频资产许可及第三方标识说明。代码与自绘几何图标采用 MIT，三段原作及演示中的动画内容采用 CC BY 4.0；产品标识保留各自权利。
 
 不要将原始 1080p 大体积媒体、测试产物、日志、桌面 `.lnk` 或个人路径配置加入发布包。演示视频使用 `docs/demos/HAAVK-01-demo.mp4`、`HAAVK-02-demo.mp4`、`HAAVK-03-demo.mp4` 命名。
